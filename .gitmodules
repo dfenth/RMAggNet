@@ -1,0 +1,3 @@
+[submodule "src/CCAT"]
+	path = src/CCAT
+	url = https://github.com/davidstutz/confidence-calibrated-adversarial-training.git
