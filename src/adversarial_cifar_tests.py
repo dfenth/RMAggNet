@@ -110,7 +110,7 @@ logger.info("= Ensemble =\nRejected | Incorrect")
 ensemble.ensemble_eval(ensemble_model, random_dataset, thresholds=thresholds, logger=logger, ood=True)
 
 logger.info("= RMAggNet =\nRejected | Incorrect")
-aggnet_eval(rm_aggnet, list(zip(noise_images, noise_labels)), batch_size=batch_size, thresholds=[0.5], max_correction=7, logger=logger, ood=True)
+aggnet_eval(rm_aggnet, list(zip(noise_images, noise_labels)), batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=logger, ood=True)
 
 logger.info("= RMAggDiff =")
 res = hybrid.evaluate(random_dataset)
@@ -191,7 +191,7 @@ for attack_name in adversarial_attacks:
     for eps, adv_data in zip(epsilons, clipped_adv_eps):
         adv_dataset = list(zip(adv_data, test_labels))
         logger.info("- eps: {} -".format(eps))
-        aggnet_eval(rm_aggnet, adv_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=7, logger=logger)
+        aggnet_eval(rm_aggnet, adv_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=logger)
     
     
     #### Open-box attacks
@@ -258,5 +258,5 @@ for attack_name in adversarial_attacks:
         logger.info("-- eps: {} --".format(eps))
         tmp_test_labels = torch.tensor([l for _,l in test_dataset[:adv_sample_size]])
         adv_dataset = list(zip(adv_data, tmp_test_labels))
-        aggnet_eval(rm_aggnet, adv_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=7, logger=logger)
+        aggnet_eval(rm_aggnet, adv_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=logger)
         del adv_loader, adv_dataset, tmp_test_labels
