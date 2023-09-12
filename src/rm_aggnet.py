@@ -434,7 +434,8 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
         - path (string): The path to load the data from
         - model (torch.nn.Module): The basis model used to generate copies which we aggregate over
         """
-        model_dict = pickle.load(open(os.path.join(path, "agg_model.p"), "rb"))
+        with open(os.path.join(path, "agg_model.p"), "rb") as pfile:
+            model_dict = pickle.load(pfile)
         model_list = []
         for m in model_dict['trained_networks']:
             model_id = m

@@ -297,7 +297,8 @@ class Ensemble(torch.nn.Module):
         - model (torch.nn.Module): The model to pass the state_dict to
         """
         self.ensemble = []
-        model_dict = pickle.load(open(os.path.join(path, "ens_model.p"), "rb"))
+        with open(os.path.join(path, "ens_model.p"), "rb") as pfile:
+            model_dict = pickle.load(pfile)
         model_list = []
         for m_id in model_dict['models']:
             classifier = model()
