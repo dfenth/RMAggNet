@@ -5,7 +5,7 @@ import math
 # CCAT imports
 import sys
 sys.path.insert(1, "CCAT") # Add the CCAT directory as an import
-import common.train
+import common
 import attacks
 
 
@@ -98,7 +98,7 @@ class CCAT:
             inputs = common.torch.as_variable(inputs, cuda)
             targets = common.torch.as_variable(targets, cuda)
 
-            outputs = self.model(inputs)
+            outputs = self.ccat_model(inputs)
             results.append(outputs.detach().cpu().numpy())
             labels.append(targets.cpu().numpy())
             confidences = common.numpy.concatenate(
@@ -129,3 +129,5 @@ class CCAT:
                     print("{:.1f} | {:.2f} | {:.2f} | {:.2f}".format(t, correct/results.shape[0], rejected/results.shape[0], 1-((correct+rejected)/results.shape[0])))
                 else:
                     print("{:.1f} | {:.2f} | {:.2f} ".format(t, rejected/results.shape[0], incorrect/results.shape[0]))
+
+        self.ccat_model.to('cpu')
