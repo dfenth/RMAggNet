@@ -147,6 +147,7 @@ class RMAggDiff(torch.nn.Module):
         class_codewords = self.rm_aggnet.bitstring_classes
         train_dataset = synthetic_dataset_gen(class_codewords, 10000)
         val_dataset = synthetic_dataset_gen(class_codewords, 1000)
+        batch_size = 128
     
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
