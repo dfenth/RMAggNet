@@ -227,6 +227,7 @@ for attack_name in adversarial_attacks:
 
 
     logger.info("== Ensemble ==\nCorrect | Rejected | Incorrect")
+    ensemble_model.to("cuda")
     adv_ensemble_model = fb.PyTorchModel(ensemble_model, bounds=(0,1))
     raw_adv, clipped_adv_eps, is_adv = attack(adv_ensemble_model, test_images, test_labels, epsilons=epsilons)
     
@@ -241,6 +242,8 @@ for attack_name in adversarial_attacks:
         ensemble.ensemble_eval(ensemble_model, adv_loader, thresholds=thresholds, logger=logger)
         del adv_loader
     
+    ensemble_model.to('cpu')
+
     logger.info("== RMAggDiff ==\nCorrect | Rejected | Incorrect")
     adv_hybrid_model = fb.PyTorchModel(hybrid, bounds=(0,1))
     raw_adv, clipped_adv_eps, is_adv = attack(adv_hybrid_model, test_images, test_labels, epsilons=epsilons)
