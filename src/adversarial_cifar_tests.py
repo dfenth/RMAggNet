@@ -27,7 +27,7 @@ def save_image_sample(sample_images, path):
 
     for i, img in enumerate(sample_images):
         img = np.squeeze(img)
-        axes[i].imshow(img, cmap='gray')
+        axes[i].imshow(img)
         axes[i].axis('off')
     
     path = path.replace(" ", "").replace("(", "").replace(")", "")
