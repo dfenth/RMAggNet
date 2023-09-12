@@ -26,7 +26,8 @@ def save_image_sample(sample_images, path):
     fig, axes = plt.subplots(nrows=1, ncols=sample_images.shape[0], constrained_layout=True)
 
     for i, img in enumerate(sample_images):
-        img = np.squeeze(img)
+        img = torch.transpose(img, 0, 2) # Change to channels last for figure!
+        img = torch.transpose(img, 0, 1) # Rotate 90 degrees
         axes[i].imshow(img)
         axes[i].axis('off')
     
