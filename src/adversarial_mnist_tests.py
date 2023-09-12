@@ -59,7 +59,7 @@ test_loader = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, s
 
 # Make sure learning rates etc. match how the model was trained!
 ################################# RMAggNet
-rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, learning_rate=1e-3, load_path="trained_models/rmaggnet_mnist")
+rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, load_path="trained_models/rmaggnet_mnist")
 
 
 ################################# Ensemble
