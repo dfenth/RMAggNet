@@ -74,6 +74,8 @@ class CCAT:
         if save_path:
             torch.save(self.ccat_model.state_dict(), save_path)
 
+        self.ccat_model.to('cpu')
+
     def evaluate(self, data, confidence_thresholds, cuda=True, ood=False, logger=None):
         """
         Evaluate the CCAT model over the specified confidence thresholds

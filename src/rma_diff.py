@@ -84,6 +84,8 @@ class Classifier(torch.nn.Module):
                 report += " - Validation Accuracy: {:.4f}".format(correct/total)
 
             print(report)
+        
+        self.to('cpu')
 
 
 def synthetic_dataset_gen(class_codewords, dataset_size):
@@ -204,6 +206,8 @@ class RMAggDiff(torch.nn.Module):
 
             correct += sum(res)
             total += labels.shape[0]
+
+        self.to('cpu')
 
         return {"loss": np.mean(losses), "accuracy": correct/total}
 

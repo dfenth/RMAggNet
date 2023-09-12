@@ -148,6 +148,9 @@ class Ensemble(torch.nn.Module):
                 
                 scheduler.step(np.mean(val_losses))
 
+            # Unload the network from the GPU
+            net.to('cpu')
+
         if logger:
             logger.info("Training complete in: {:.2f}s".format(time.time()-total_training_time))
         else:
@@ -195,6 +198,8 @@ class Ensemble(torch.nn.Module):
             net_output = np.concatenate(net_output)
             # Expand net_output so
             outputs.append(net_output)
+
+            net.to('cpu')
 
         outputs = np.stack(outputs) 
         # Reshape to be elem, net, result

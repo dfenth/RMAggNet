@@ -236,6 +236,7 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
         # membership_vector = torch.cat(membership_vector)
         membership_vector = torch.transpose(membership_vector, 0, 1)
         membership_vector = torch.squeeze(membership_vector)
+        [m.to('cpu') for m in self.network_list]
         return membership_vector
 
 
@@ -469,7 +470,7 @@ def aggnet_eval(rm_aggnet, dataset, max_correction, batch_size=64, thresholds=[0
                 t, res['rejected']*100, (res['incorrect']+res['correct'])*100 
             ))
         else:
-            logger.info("{:.1f} | {:.2f} | {:.2f} & {:.2f}".format(
+            logger.info("{:.1f} | {:.2f} | {:.2f} | {:.2f}".format(
                 t, res['correct']*100, res['rejected']*100, res['incorrect']*100 
             ))
 
@@ -482,6 +483,6 @@ def aggnet_eval(rm_aggnet, dataset, max_correction, batch_size=64, thresholds=[0
                     t, res['rejected']*100, (res['incorrect']+res['correct'])*100
                 ))
             else:
-                logger.info("{:.1f} | {:.2f} & {:.2f} | {:.2f}".format(
+                logger.info("{:.1f} | {:.2f} | {:.2f} | {:.2f}".format(
                     t, res['correct']*100, res['rejected']*100, res['incorrect']*100 
                 ))
