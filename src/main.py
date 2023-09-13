@@ -69,7 +69,7 @@ parser.add_argument(
     '--cuda',
     type=bool,
     help='Run the code using CUDA',
-    choices=[True, False],
+    action=argparse.BooleanOptionalAction,
     default=True,
     required=False
 )
