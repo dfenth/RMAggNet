@@ -53,7 +53,7 @@ def train_cifar(models, save_dir, cuda):
     ################################# RMAggNet
     if 'rmaggnet' in models:
         rm_start_time = time.time()
-        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, learning_rate=1e-3, cuda=cuda)
+        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, cuda=cuda)
         model_loss_hist = rm_aggnet.train_model(train_dataset, validation_dataset, batch_size=batch_size, epochs=epochs, class_threshold=0.5, verbose=False, logger=prog_logger)
         rm_aggnet.save_aggnet("{}/rmaggnet_cifar".format(save_dir))
         

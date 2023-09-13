@@ -53,7 +53,7 @@ def train_mnist(models, save_dir, cuda):
 
     ################################# RMAggNet
     if 'rmaggnet' in models:
-        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, learning_rate=1e-4, cuda=cuda)
+        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, cuda=cuda)
         model_loss_hist = rm_aggnet.train_model(train_dataset, validation_dataset, batch_size=batch_size, epochs=epochs, learning_rate=1e-4, class_threshold=0.5, verbose=False, logger=prog_logger)
         rm_aggnet.save_aggnet("{}/rmaggnet_mnist".format(save_dir))
         prog_logger.info("===RMAggNet===")
