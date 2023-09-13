@@ -404,7 +404,11 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
                     val_dataset.append((i, 0.0))
             validation_dataset = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
             
-            loss_history = model.train_model(model_dataset, validation_dataset, epochs=epochs, class_threshold=class_threshold, device=self.device, learning_rate=learning_rate, verbose=verbose, logger=logger)
+            cuda = False
+            if self.device == "cuda":
+                cuda = True
+
+            loss_history = model.train_model(model_dataset, validation_dataset, epochs=epochs, class_threshold=class_threshold, cuda=cuda, learning_rate=learning_rate, verbose=verbose, logger=logger)
             model_loss_histories.append(loss_history)
 
             count += 1
