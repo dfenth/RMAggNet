@@ -38,6 +38,7 @@ parser.add_argument(
     type=str,
     help='Select the box type (`openbox`, `closedbox` or `both`)',
     choices=['openbox', 'closedbox', 'both'],
+    nargs="+",
     default='both',
     required=False   
 )
@@ -61,10 +62,11 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+datasets = []
 if "all" in args.dataset:
     datasets = ["mnist", "emnist", "cifar"]
 else:
-    datasets = args.dataset
+    datasets.append(args.dataset)
 
 if "all" in args.models:
     models = ["rmaggnet", "ensemble", "ccat", "surrogate"]
