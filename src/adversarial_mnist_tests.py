@@ -35,7 +35,7 @@ def save_image_sample(sample_images, path):
     plt.close()
 
 
-def attack_mnist(models, load_dir, attacks, attack_type):
+def attack_mnist(models, load_dir, attacks, attack_type, cuda):
     """
     Evaluates the effect of adversarial attacks on the MNIST dataset
 
@@ -44,12 +44,15 @@ def attack_mnist(models, load_dir, attacks, attack_type):
     - load_dir (string): The directory to load the models from
     - attacks (list of string): A list of attacks to use (choose from 'pgdl2', 'pgdlinf', 'cwl2' and 'boundary')
     - attack_type (list of string): A list of attack types (choose from 'openbox', 'closedbox')
+    - cuda (bool): Whether to run with CUDA
     """
     #### Set up the logger
     logname = datetime.datetime.now().strftime("%d-%m-%Y-%H%M")
     logging.basicConfig(level=logging.INFO, filename="{}_adv_mnist.log".format(logname))
     logger = logging.getLogger(__name__)
     ####
+
+    device = 'cuda' if cuda and torch.cuda.is_available() else 'cpu'
 
     batch_size = 256
     adv_sample_size = 1000
@@ -71,7 +74,7 @@ def attack_mnist(models, load_dir, attacks, attack_type):
     # Make sure learning rates etc. match how the model was trained!
     ################################# RMAggNet
     if 'rmaggnet' in models:
-        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, load_path="{}/rmaggnet_mnist".format(load_dir))
+        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, load_path="{}/rmaggnet_mnist".format(load_dir), cuda=cuda)
         
 
         ################################# RMAggDiff
@@ -99,18 +102,18 @@ def attack_mnist(models, load_dir, attacks, attack_type):
 
     if 'ccat' in models:
         logger.info("= CCAT =\nCorrect | Rejected | Incorrect")
-        ccat.evaluate(test_loader, confidence_thresholds=thresholds, cuda=True, logger=logger)
+        ccat.evaluate(test_loader, confidence_thresholds=thresholds, cuda=cuda, logger=logger)
 
     if 'ensemble' in models:
         logger.info("= Ensemble =\nCorrect | Rejected | Incorrect")
-        ensemble.ensemble_eval(ensemble_model, test_loader, thresholds=thresholds, logger=logger)
+        ensemble.ensemble_eval(ensemble_model, test_loader, thresholds=thresholds, logger=logger, cuda=cuda)
 
     if 'rmaggnet' in models:
         logger.info("= RMAggNet =\nCorrect | Rejected | Incorrect")
         aggnet_eval(rm_aggnet, test_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=logger)
 
         logger.info("= RMAggDiff =")
-        res = hybrid.evaluate(test_loader)
+        res = hybrid.evaluate(test_loader, cuda=cuda)
         logger.info(res)
 
     #################################################### Random Noise OOD data
@@ -121,18 +124,18 @@ def attack_mnist(models, load_dir, attacks, attack_type):
 
     if 'ccat' in models:
         logger.info("= CCAT =\nRejected | Incorrect")
-        ccat.evaluate(random_dataset, confidence_thresholds=thresholds, cuda=True, logger=logger, ood=True)
+        ccat.evaluate(random_dataset, confidence_thresholds=thresholds, cuda=cuda, logger=logger, ood=True)
 
     if 'ensemble' in models:
         logger.info("= Ensemble =\nRejected | Incorrect")
-        ensemble.ensemble_eval(ensemble_model, random_dataset, thresholds=thresholds, logger=logger, ood=True)
+        ensemble.ensemble_eval(ensemble_model, random_dataset, thresholds=thresholds, logger=logger, ood=True, cuda=cuda)
 
     if 'rmaggnet' in models:
         logger.info("= RMAggNet =\nRejected | Incorrect")
         aggnet_eval(rm_aggnet, list(zip(noise_images, noise_labels)), batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=logger, ood=True)
 
         logger.info("= RMAggDiff =")
-        res = hybrid.evaluate(random_dataset)
+        res = hybrid.evaluate(random_dataset, cuda=cuda)
         logger.info(res)
 
 
@@ -144,11 +147,11 @@ def attack_mnist(models, load_dir, attacks, attack_type):
 
     if 'ccat' in models:
         logger.info("= CCAT =\nRejected | Incorrect")
-        ccat.evaluate(fmnist_loader, confidence_thresholds=thresholds, cuda=True, logger=logger, ood=True)
+        ccat.evaluate(fmnist_loader, confidence_thresholds=thresholds, cuda=cuda, logger=logger, ood=True)
     
     if 'ensemble' in models:
         logger.info("= Ensemble =\nRejected | Incorrect")
-        ensemble.ensemble_eval(ensemble_model, fmnist_loader, thresholds=thresholds, logger=logger, ood=True)
+        ensemble.ensemble_eval(ensemble_model, fmnist_loader, thresholds=thresholds, logger=logger, ood=True, cuda=cuda)
 
     if 'rmaggnet' in models:
         logger.info("= RMAggNet =\nRejected | Incorrect")
@@ -163,15 +166,15 @@ def attack_mnist(models, load_dir, attacks, attack_type):
 
     test_images = torch.cat(list(map(lambda x: torch.unsqueeze(x[0], dim=0), test_dataset[:adv_sample_size])), dim=0)
     test_labels = torch.tensor(list(map(lambda x: x[1], test_dataset[:adv_sample_size])))
-    test_images = test_images.to('cuda')
-    test_labels = test_labels.to('cuda')
+    test_images = test_images.to(device)
+    test_labels = test_labels.to(device)
 
     # Load surrogate model for closed-box adversarial attack via transferability
     logger.info("=== Surrogate model ===")
     base_model = StandardModel()
     base_model.load_state_dict(torch.load("{}/standard_mnist.pth.tar".format(load_dir)))
-    base_model.to('cuda')
-    base_model.evaluate(test_loader, logger=logger)
+    base_model.to(device)
+    base_model.evaluate(test_loader, logger=logger, cuda=cuda)
 
     adversarial_attacks = {}
 
@@ -226,14 +229,14 @@ def attack_mnist(models, load_dir, attacks, attack_type):
                 for eps, adv_data in zip(epsilons, clipped_adv_eps):
                     adv_loader = torch.utils.data.DataLoader(list(zip(adv_data, test_labels)), batch_size=batch_size, shuffle=False)
                     logger.info("- eps: {} -".format(eps))
-                    ccat.evaluate(adv_loader, confidence_thresholds=thresholds, cuda=True, logger=logger)
+                    ccat.evaluate(adv_loader, confidence_thresholds=thresholds, cuda=cuda, logger=logger)
 
             if 'ensemble' in models:
                 logger.info("== Ensemble ==\nCorrect | Rejected | Incorrect")
                 for eps, adv_data in zip(epsilons, clipped_adv_eps):
                     adv_loader = torch.utils.data.DataLoader(list(zip(adv_data, test_labels)), batch_size=batch_size, shuffle=False)
                     logger.info("- eps: {} -".format(eps))
-                    ensemble.ensemble_eval(ensemble_model, adv_loader, thresholds=thresholds, logger=logger)
+                    ensemble.ensemble_eval(ensemble_model, adv_loader, thresholds=thresholds, logger=logger, cuda=cuda)
 
             if 'rmaggnet' in models:
                 logger.info("== RMAggNet ==\nCorrect | Rejected | Incorrect")
@@ -271,13 +274,13 @@ def attack_mnist(models, load_dir, attacks, attack_type):
                 for eps, adv_data in zip(epsilons, clipped_adv_eps):
                     adv_loader = torch.utils.data.DataLoader(list(zip(adv_data, test_labels)), batch_size=batch_size, shuffle=False)
                     logger.info("- eps: {} -".format(eps))
-                    ccat.evaluate(adv_loader, confidence_thresholds=thresholds, cuda=True, logger=logger)
+                    ccat.evaluate(adv_loader, confidence_thresholds=thresholds, cuda=cuda, logger=logger)
                     del adv_loader
 
             if 'ensemble' in models:
                 logger.info("== Ensemble ==\nCorrect | Rejected | Incorrect")
-                ensemble_model.to("cuda")
-                [en.to("cuda") for en in ensemble_model.ensemble]
+                ensemble_model.to_device(device)
+
                 adv_ensemble_model = fb.PyTorchModel(ensemble_model, bounds=(0,1))
                 raw_adv, clipped_adv_eps, is_adv = attack(adv_ensemble_model, test_images, test_labels, epsilons=epsilons)
                 
@@ -292,11 +295,10 @@ def attack_mnist(models, load_dir, attacks, attack_type):
                     ensemble.ensemble_eval(ensemble_model, adv_loader, thresholds=thresholds, logger=logger)
                     del adv_loader
                 
-                ensemble_model.to('cpu')
-                [en.to('cpu') for en in ensemble_model.ensemble]
+                ensemble_model.to_device('cpu')
 
             if 'rmaggnet' in models:
-                hybrid.to_device(device="cuda")
+                hybrid.to_device(device=device)
                 adv_hybrid_model = fb.PyTorchModel(hybrid, bounds=(0,1))
                 raw_adv, clipped_adv_eps, is_adv = attack(adv_hybrid_model, test_images, test_labels, epsilons=epsilons)
 
@@ -328,5 +330,6 @@ if __name__=="__main__":
     ],
     load_dir="trained_models",
     attacks=["pgdl2", "pgdlinf"],
-    attack_type=["closedbox", "openbox"]
+    attack_type=["closedbox", "openbox"],
+    cuda=True
     )

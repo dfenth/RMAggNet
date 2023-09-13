@@ -15,13 +15,14 @@ from arch.rm_models import RMMNISTModel as RMModel
 from arch.ensemble_models import EnsMNISTModel as EnsModel
 from arch.standard_models import MNISTModel as StandardModel 
 
-def train_mnist(models, save_dir):
+def train_mnist(models, save_dir, cuda):
     """
     Train specified models on the MNIST dataset
 
     Parameters:
     - models (list of string): A list of models to train (choose from 'rmaggnet', 'ensemble', 'ccat' and 'surrogate')
     - save_dir (string): The directory to save the models to
+    - cuda (bool): Whether to run with CUDA
     """
     #### Set up the logger
     logname = datetime.datetime.now().strftime("%d-%m-%Y-%H%M")
@@ -52,7 +53,7 @@ def train_mnist(models, save_dir):
 
     ################################# RMAggNet
     if 'rmaggnet' in models:
-        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, learning_rate=1e-4)
+        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, learning_rate=1e-4, cuda=cuda)
         model_loss_hist = rm_aggnet.train_model(train_dataset, validation_dataset, batch_size=batch_size, epochs=epochs, learning_rate=1e-4, class_threshold=0.5, verbose=False, logger=prog_logger)
         rm_aggnet.save_aggnet("{}/rmaggnet_mnist".format(save_dir))
         prog_logger.info("===RMAggNet===")
@@ -63,11 +64,11 @@ def train_mnist(models, save_dir):
     ################################# Ensemble
     if 'ensemble' in models:
         ensemble_model = ensemble.Ensemble(EnsModel, 16)
-        ensemble_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-4, verbose=False, logger=prog_logger)
+        ensemble_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-4, verbose=False, logger=prog_logger, cuda=cuda)
         ensemble_model.save_ensemble("{}/ens_mnist".format(save_dir))
 
         prog_logger.info("===Ensemble===")
-        ensemble.ensemble_eval(ensemble_model, test_loader, thresholds=[x/10 for x in range(11)])
+        ensemble.ensemble_eval(ensemble_model, test_loader, thresholds=[x/10 for x in range(11)], cuda=cuda)
 
         del ensemble_model
 
@@ -84,21 +85,21 @@ def train_mnist(models, save_dir):
             epochs=epochs, 
             optimizer=optimizer, 
             epsilon=0.3, 
-            cuda=True, 
+            cuda=cuda, 
             save_path="{}/ccat_mnist.pth.tar".format(save_dir)
         )
 
         print("=== CCAT ===")
-        ccat.evaluate(test_loader, confidence_thresholds=[x/10 for x in range(11)], cuda=True, logger=prog_logger)
+        ccat.evaluate(test_loader, confidence_thresholds=[x/10 for x in range(11)], cuda=cuda, logger=prog_logger)
 
         del ccat
 
     ################################# Standard (used for closed-box transfer attacks)
     if 'surrogate' in models:
         standard_model = StandardModel()
-        standard_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-4, verbose=False, logger=prog_logger)
-        standard_model.evaluate(test_loader, logger=prog_logger)
+        standard_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-4, verbose=False, logger=prog_logger, cuda=cuda)
+        standard_model.evaluate(test_loader, logger=prog_logger, cuda=cuda)
         torch.save(standard_model.state_dict(), "{}/standard_mnist.pth.tar".format(save_dir))
 
 if __name__ == "__main__":
-    train_mnist(["rmaggnet", "ensemble", "ccat", "surrogate"], save_dir='trained_models')
+    train_mnist(["rmaggnet", "ensemble", "ccat", "surrogate"], save_dir='trained_models', cuda=torch.cuda.is_available())

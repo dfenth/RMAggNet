@@ -212,7 +212,18 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
         """
         return torch.nn.ModuleList([MembershipModel(ls, model) for ls in self.class_permutations])
 
+
+    def to_device(self, device):
+        """
+        Move all contained models to a new device
+
+        Parameters:
+        - device (str): The device to move to
+        """
+        self.device = device
+        [m.to(self.device) for m in self.network_list]
     
+
     def forward(self, x):
         """
         Forward pass of the achitecture
@@ -324,7 +335,7 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
         dataset = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
         
         [m.eval() for m in self.network_list]
-
+        
         correct = 0
         rejected = 0
         total = 0

@@ -8,8 +8,9 @@ class AbsModel(torch.nn.Module):
         super(AbsModel, self).__init__()
 
             
-    def train_on_data(self, train_dataset, val_dataset=None, epochs=10, lr=1e-3, optimiser=None, verbose=False, logger=None):
-        self.to('cuda')
+    def train_on_data(self, train_dataset, val_dataset=None, epochs=10, lr=1e-3, optimiser=None, verbose=False, logger=None, cuda=True):
+        device = 'cuda' if cuda and torch.cuda.is_available() else 'cpu'
+        self.to(device)
         
         if not optimiser:
             opt = torch.optim.Adam(params=self.parameters(), lr=lr)
@@ -31,8 +32,8 @@ class AbsModel(torch.nn.Module):
                 batch_start_time = time.time()
                 
                 inputs, labels = data
-                inputs = inputs.to('cuda')
-                labels = labels.to('cuda')
+                inputs = inputs.to(device)
+                labels = labels.to(device)
 
                 opt.zero_grad()
                 out = self.forward(inputs)
@@ -68,8 +69,8 @@ class AbsModel(torch.nn.Module):
 
                 for data in val_dataset:
                     inputs, labels = data
-                    inputs = inputs.to('cuda')
-                    labels = labels.to('cuda')
+                    inputs = inputs.to(device)
+                    labels = labels.to(device)
                     out = self.forward(inputs)
                     #out = torch.nn.functional.softmax(out, dim=1)
                     
@@ -92,7 +93,9 @@ class AbsModel(torch.nn.Module):
                 # Update scheduler based on validation results
                 scheduler.step(np.mean(val_losses))
 
-    def evaluate(self, test_dataset, logger=None):
+    def evaluate(self, test_dataset, logger=None, cuda=True):
+        device = 'cuda' if cuda and torch.cuda.is_available() else 'cpu'
+        self.to(device)
         self.eval()
         eval_start_time = time.time()
         correct = 0
@@ -100,8 +103,8 @@ class AbsModel(torch.nn.Module):
 
         for data in test_dataset:
             inputs, labels = data
-            inputs = inputs.to('cuda')
-            labels = labels.to('cuda')
+            inputs = inputs.to(device)
+            labels = labels.to(device)
             out = self.forward(inputs)
             predictions = out.argmax(dim=1)
             total += labels.shape[0]
@@ -213,10 +216,10 @@ class CIFARModel(AbsModel):
         
         return x
 
-    def train_on_data(self, train_dataset, val_dataset=None, epochs=10, lr=1e-3, verbose=False, logger=None):
+    def train_on_data(self, train_dataset, val_dataset=None, epochs=10, lr=1e-3, verbose=False, logger=None, cuda=True):
         # Override train_on_data to provide custom optmiser with heavy weight decay!
         opt = torch.optim.Adam(params=self.parameters(), lr=lr, weight_decay=0.0025)
-        super().train_on_data(train_dataset, val_dataset=val_dataset, epochs=epochs, lr=lr, verbose=verbose, optimiser=opt, logger=logger)
+        super().train_on_data(train_dataset, val_dataset=val_dataset, epochs=epochs, lr=lr, verbose=verbose, optimiser=opt, logger=logger, cuda=cuda)
 
 
 """

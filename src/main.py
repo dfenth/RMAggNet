@@ -65,8 +65,19 @@ parser.add_argument(
     required=True
 )
 
+parser.add_argument(
+    '--cuda',
+    type=bool,
+    help='Run the code using CUDA',
+    choices=[True, False],
+    default=True,
+    required=False
+)
 
 args = parser.parse_args()
+
+cuda = True if args.cuda and torch.cuda.is_available() else False
+print("CUDA detected: {} - Using CUDA: {}".format(torch.cuda.is_available(), cuda))
 
 datasets = []
 if "all" in args.dataset:
@@ -86,13 +97,13 @@ if args.mode == "train":
 
     for d in datasets:
         if d == 'mnist':
-            print("Training MNIST: {}, {}".format(models, args.dir))
-            mnist_train.train_mnist(models, args.dir)
+            print("Training MNIST: {}, {}".format(models))
+            mnist_train.train_mnist(models, args.dir, cuda)
         elif d == 'emnist':
-            print("Training EMNIST: {}, {}".format(models, args.dir))
+            print("Training EMNIST: {}, {}".format(models, args.dir, cuda))
             emnist_train.train_emnist(models, args.dir)
         elif d == 'cifar':
-            print("Training CIFAR: {}, {}".format(models, args.dir))
+            print("Training CIFAR: {}, {}".format(models, args.dir, cuda))
             cifar_train.train_cifar(models, args.dir)
 
 elif args.mode == "attack":
@@ -111,13 +122,13 @@ elif args.mode == "attack":
     for d in datasets:
         if d == 'mnist':
             print("Attacking MNIST: {}, {}, {}, {}".format(models, args.dir, attacks, boxtype))
-            adversarial_mnist_tests.attack_mnist(models, args.dir, attacks, boxtype)
+            adversarial_mnist_tests.attack_mnist(models, args.dir, attacks, boxtype, cuda)
         elif d == 'emnist':
             print("Attacking EMNIST: {}, {}, {}, {}".format(models, args.dir, attacks, boxtype))
-            adversarial_emnist_tests.attack_emnist(models, args.dir, attacks, boxtype)
+            adversarial_emnist_tests.attack_emnist(models, args.dir, attacks, boxtype, cuda)
         elif d == 'cifar':
             print("Attacking CIFAR: {}, {}, {}, {}".format(models, args.dir, attacks, boxtype))
-            adversarial_cifar_tests.attack_cifar(models, args.dir, attacks, boxtype)
+            adversarial_cifar_tests.attack_cifar(models, args.dir, attacks, boxtype, cuda)
 
 else:
     print("Failed to execute due to bad --mode")

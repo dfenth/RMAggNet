@@ -36,6 +36,15 @@ class Ensemble(torch.nn.Module):
             new_weights = torch.ones(size=self.logit_weights.weight.shape)/num_ensemble
             self.logit_weights.weight.data = new_weights
 
+    def to_device(self, device):
+        """
+        Move all contained models to a new device
+
+        Parameters:
+        - device (str): The device to move to
+        """
+        [en.to(device) for en in self.ensemble]
+        self.to(device)
 
     def train_on_data(self, training_data, validation_data, epochs=10, lr=1e-3, cuda=True, verbose=True, logger=None):
         """
@@ -309,7 +318,7 @@ class Ensemble(torch.nn.Module):
         self.logit_weights.load_state_dict(torch.load(os.path.join(path, "logit_weights")))
 
 
-def ensemble_eval(ensemble, dataset, thresholds, logger=None, ood=False):
+def ensemble_eval(ensemble, dataset, thresholds, logger=None, ood=False, cuda=True):
     """
     Evaluate Ensemble over a dataset, varying the thresholds
 
@@ -319,9 +328,10 @@ def ensemble_eval(ensemble, dataset, thresholds, logger=None, ood=False):
     - thresholds (list of float): A list of thersholds to iterate over
     - logger (Logger, optional): A logger to print the information to (default is None)
     - ood (bool, optional): Whether the data is naturally out-of-distribution (default is False)
+    - cuda (bool, optinal): Whether to use CUDA
     """
     for t in thresholds:
-        res = ensemble.evaluate_with_reject(dataset, t)
+        res = ensemble.evaluate_with_reject(dataset, t, cuda=cuda)
         if ood:
             logger.info("{:.1f} | {:.2f} | {:.2f}".format(
                 t, res['rejected']*100, (res['incorrect']+res['correct'])*100 

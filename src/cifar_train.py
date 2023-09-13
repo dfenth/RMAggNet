@@ -16,13 +16,14 @@ from arch.ensemble_models import EnsCIFARModel as EnsModel
 from arch.standard_models import CIFARModel as StandardModel 
 
 
-def train_cifar(models, save_dir):
+def train_cifar(models, save_dir, cuda):
     """
     Train specified models on the CIFAR-10 dataset
 
     Parameters:
     - models (list of string): A list of models to train (choose from 'rmaggnet', 'ensemble', 'ccat' and 'surrogate')
     - save_dir (string): The directory to save the models to
+    - cuda (bool): Whether to run with CUDA
     """
     #### Set up the logger
     logname = datetime.datetime.now().strftime("%d-%m-%Y-%H%M")
@@ -52,7 +53,7 @@ def train_cifar(models, save_dir):
     ################################# RMAggNet
     if 'rmaggnet' in models:
         rm_start_time = time.time()
-        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, learning_rate=1e-3)
+        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, learning_rate=1e-3, cuda=cuda)
         model_loss_hist = rm_aggnet.train_model(train_dataset, validation_dataset, batch_size=batch_size, epochs=epochs, class_threshold=0.5, verbose=False, logger=prog_logger)
         rm_aggnet.save_aggnet("{}/rmaggnet_cifar".format(save_dir))
         
@@ -67,11 +68,11 @@ def train_cifar(models, save_dir):
     if 'ensemble' in models:
         ens_start_time = time.time()
         ensemble_model = ensemble.Ensemble(EnsModel, 16)
-        ensemble_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-3, verbose=False, logger=prog_logger)
+        ensemble_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-3, verbose=False, logger=prog_logger, cuda=cuda)
         ensemble_model.save_ensemble("{}/ens_cifar".format(save_dir))
 
         prog_logger.info("===Ensemble===")
-        ensemble.ensemble_eval(ensemble_model, test_loader, thresholds=[x/10 for x in range(11)])
+        ensemble.ensemble_eval(ensemble_model, test_loader, thresholds=[x/10 for x in range(11)], cuda=cuda)
 
         prog_logger.info("Ensemble training took: {:.2f}s".format(time.time()-ens_start_time))
 
@@ -94,12 +95,12 @@ def train_cifar(models, save_dir):
             epochs=ccat_epochs, 
             optimizer=optimizer, 
             epsilon=0.3, 
-            cuda=True, 
+            cuda=cuda, 
             save_path="{}/ccat_cifar.pth.tar".format(save_dir)
         )
 
         print("=== CCAT ===")
-        ccat.evaluate(test_loader, confidence_thresholds=[x/10 for x in range(11)], cuda=True, logger=prog_logger)
+        ccat.evaluate(test_loader, confidence_thresholds=[x/10 for x in range(11)], cuda=cuda, logger=prog_logger)
         prog_logger.info("CCAT training took: {:.2f}s".format(time.time()-ccat_start_time))
 
         del ccat
@@ -107,8 +108,8 @@ def train_cifar(models, save_dir):
     ################################# Standard (used for closed-box transfer attacks)
     if 'surrogate' in models:
         standard_model = StandardModel()
-        standard_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-3, verbose=False, logger=prog_logger)
-        standard_model.evaluate(test_loader, logger=prog_logger)
+        standard_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-3, verbose=False, logger=prog_logger, cuda=cuda)
+        standard_model.evaluate(test_loader, logger=prog_logger, cuda=cuda)
         torch.save(standard_model.state_dict(), "{}/standard_cifar.pth.tar".format(save_dir))
 
 
