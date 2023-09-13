@@ -234,7 +234,7 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
         Returns:
         - membership_vector (torch.tensor): Returns the raw combined output from each network for each input
         """
-        [m.to(self.device) for m in self.network_list]
+        # [m.to(self.device) for m in self.network_list]
         membership_vector = torch.cat([torch.unsqueeze(m(x), dim=0) for m in self.network_list])
         # # This code is useful if we have a large model with limited GPU memory available to us
         # # but it slows down evaluation massively!
@@ -247,7 +247,7 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
         # membership_vector = torch.cat(membership_vector)
         membership_vector = torch.transpose(membership_vector, 0, 1)
         membership_vector = torch.squeeze(membership_vector)
-        [m.to('cpu') for m in self.network_list]
+        # [m.to('cpu') for m in self.network_list]
         return membership_vector
 
 
@@ -333,7 +333,7 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
 
         # Create the dataset
         dataset = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-        
+        self.to_device(self.device)
         [m.eval() for m in self.network_list]
         
         correct = 0
@@ -352,6 +352,7 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
             rejected += len(list(filter(lambda x: np.isnan(x), predictions)))
 
         incorrect = total-correct-rejected
+        self.to_device('cpu')
 
         return {
             "correct": correct/total,
@@ -378,6 +379,7 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
         - model_loss_histories (list of list of float): The historical losses for each model
         """
         
+        self.to_device(self.device)
         model_loss_histories = []
         count = 1
         for model in self.network_list:
@@ -412,7 +414,7 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
             model_loss_histories.append(loss_history)
 
             count += 1
-
+        self.to_device(self.device)
         return model_loss_histories
 
 
