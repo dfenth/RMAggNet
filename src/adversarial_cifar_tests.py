@@ -36,7 +36,7 @@ def save_image_sample(sample_images, path):
     plt.close()
 
 
-def attack_cifar(models, load_dir, attacks, type):
+def attack_cifar(models, load_dir, attacks, attack_type):
     """
     Evaluates the effect of adversarial attacks on the CIFAR-10 dataset
 
@@ -44,7 +44,7 @@ def attack_cifar(models, load_dir, attacks, type):
     - models (list of string): A list of models to train (choose from 'rmaggnet', 'ensemble', 'ccat' and 'surrogate')
     - load_dir (string): The directory to load the models from
     - attacks (list of string): A list of attacks to use (choose from 'pgdl2', 'pgdlinf', 'cwl2' and 'boundary')
-    - type (list of string): A list of attack types (choose from 'openbox', 'closedbox')
+    - attack_type (list of string): A list of attack types (choose from 'openbox', 'closedbox')
     """
     #### Set up the logger
     logname = datetime.datetime.now().strftime("%d-%m-%Y-%H%M")
@@ -179,7 +179,7 @@ def attack_cifar(models, load_dir, attacks, type):
         epsilons = adversarial_attacks[attack_name]
         logger.info(attack_name)
         
-        if 'closedbox' in type:
+        if 'closedbox' in attack_type:
             #### Transfer attacks
             logger.info("=== Transfer attacks ===")
             
@@ -218,7 +218,7 @@ def attack_cifar(models, load_dir, attacks, type):
                     logger.info("- eps: {} -".format(eps))
                     aggnet_eval(rm_aggnet, adv_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=logger)
         
-        if 'openbox' in type:
+        if 'openbox' in attack_type:
             #### Open-box attacks
             logger.info("=== Open-box attacks ===")
             
@@ -297,5 +297,5 @@ if __name__ == "__main__":
         ],
         load_dir="trained_models",
         attacks=["pgdl2", "pgdlinf"],
-        type=["closedbox", "openbox"]
+        attack_type=["closedbox", "openbox"]
     )
