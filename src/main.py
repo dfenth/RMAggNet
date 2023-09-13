@@ -69,7 +69,7 @@ datasets = []
 if "all" in args.dataset:
     datasets = ["mnist", "emnist", "cifar"]
 else:
-    datasets.append(args.dataset)
+    datasets = args.dataset
 
 if "all" in args.models:
     models = ["rmaggnet", "ensemble", "ccat", "surrogate"]
