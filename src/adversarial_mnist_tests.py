@@ -277,6 +277,7 @@ def attack_mnist(models, load_dir, attacks, attack_type):
             if 'ensemble' in models:
                 logger.info("== Ensemble ==\nCorrect | Rejected | Incorrect")
                 ensemble_model.to("cuda")
+                [en.to("cuda") for en in ensemble_model.ensemble]
                 adv_ensemble_model = fb.PyTorchModel(ensemble_model, bounds=(0,1))
                 raw_adv, clipped_adv_eps, is_adv = attack(adv_ensemble_model, test_images, test_labels, epsilons=epsilons)
                 
@@ -292,8 +293,10 @@ def attack_mnist(models, load_dir, attacks, attack_type):
                     del adv_loader
                 
                 ensemble_model.to('cpu')
+                [en.to('cpu') for en in ensemble_model.ensemble]
 
             if 'rmaggnet' in models:
+                hybrid.to_device(device="cuda")
                 adv_hybrid_model = fb.PyTorchModel(hybrid, bounds=(0,1))
                 raw_adv, clipped_adv_eps, is_adv = attack(adv_hybrid_model, test_images, test_labels, epsilons=epsilons)
 
@@ -313,6 +316,8 @@ def attack_mnist(models, load_dir, attacks, attack_type):
                     adv_dataset = list(zip(adv_data, tmp_test_labels))
                     aggnet_eval(rm_aggnet, adv_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=logger)
                     del adv_loader, adv_dataset, tmp_test_labels
+                
+                hybrid.to_device(device='cpu')
 
 if __name__=="__main__":
     attack_mnist(

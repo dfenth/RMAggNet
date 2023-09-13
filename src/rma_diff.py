@@ -156,6 +156,17 @@ class RMAggDiff(torch.nn.Module):
 
         self.diff_replacement.train_data(train_loader, epochs=10, val_data=val_loader)
 
+    def to_device(self, device):
+        """
+        Move all contained models to a new device
+
+        Parameters:
+        - device (str): The device to move to
+        """
+        self.rm_aggnet.to(device)
+        self.diff_replacement.to(device)
+        self.to(device)
+
     def forward(self, x):
         """
         Pass data to the RMAggNet model, followed by the differentiable classifier
