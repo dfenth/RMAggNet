@@ -16,12 +16,13 @@ from arch.ensemble_models import EnsCIFARModel as EnsModel
 from arch.standard_models import CIFARModel as StandardModel 
 
 
-def train_cifar(models):
+def train_cifar(models, save_dir):
     """
     Train specified models on the CIFAR-10 dataset
 
     Parameters:
-    - models (dict): A dictionary of models to train (choose from 'rmaggnet', 'ensemble', 'ccat' and 'surrogate') as keys with the file names as values
+    - models (list of string): A list of models to train (choose from 'rmaggnet', 'ensemble', 'ccat' and 'surrogate')
+    - save_dir (string): The directory to save the models to
     """
     #### Set up the logger
     logname = datetime.datetime.now().strftime("%d-%m-%Y-%H%M")
@@ -53,9 +54,8 @@ def train_cifar(models):
         rm_start_time = time.time()
         rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, learning_rate=1e-3)
         model_loss_hist = rm_aggnet.train_model(train_dataset, validation_dataset, batch_size=batch_size, epochs=epochs, class_threshold=0.5, verbose=False, logger=prog_logger)
-
-        # rm_aggnet.save_aggnet("trained_models/rmaggnet_cifar")
-        rm_aggnet.save_aggnet("trained_models/{}".format(models['rmaggnet']))
+        rm_aggnet.save_aggnet("{}/rmaggnet_cifar".format(save_dir))
+        
         prog_logger.info("===RMAggNet===")
         rm_aggnet.aggnet_eval(rm_aggnet, test_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=prog_logger)
         prog_logger.info("RMAggNet training took: {:.2f}s".format(time.time()-rm_start_time))
@@ -68,8 +68,7 @@ def train_cifar(models):
         ens_start_time = time.time()
         ensemble_model = ensemble.Ensemble(EnsModel, 16)
         ensemble_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-3, verbose=False, logger=prog_logger)
-        # ensemble_model.save_ensemble("trained_models/ens_cifar")
-        ensemble_model.save_ensemble("trained_models/{}".format(models['ensemble']))
+        ensemble_model.save_ensemble("{}/ens_cifar".format(save_dir))
 
         prog_logger.info("===Ensemble===")
         ensemble.ensemble_eval(ensemble_model, test_loader, thresholds=[x/10 for x in range(11)])
@@ -96,8 +95,7 @@ def train_cifar(models):
             optimizer=optimizer, 
             epsilon=0.3, 
             cuda=True, 
-            # save_path='trained_models/ccat_cifar.pth.tar'
-            save_path='trained_models/{}.pth.tar'.format(models['ccat'])
+            save_path="{}/ccat_cifar.pth.tar".format(save_dir)
         )
 
         print("=== CCAT ===")
@@ -111,13 +109,8 @@ def train_cifar(models):
         standard_model = StandardModel()
         standard_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-3, verbose=False, logger=prog_logger)
         standard_model.evaluate(test_loader, logger=prog_logger)
-        # torch.save(standard_model.state_dict(), 'trained_models/standard_cifar.pth.tar')
-        torch.save(standard_model.state_dict(), 'trained_models/{}.pth.tar'.format(models['surrogate']))
+        torch.save(standard_model.state_dict(), "{}/standard_cifar.pth.tar".format(save_dir))
+
 
 if __name__ == "__main__":
-    train_cifar({
-        "rmaggnet": "rmaggnet_cifar",
-        "ensemble": "ens_cifar",
-        "ccat": "ccat_cifar",
-        "surrogate": "standard_cifar"
-    })
+    train_cifar(["rmaggnet", "ensemble", "ccat", "surrogate"], save_dir="trained_models")

@@ -14,12 +14,13 @@ from arch.rm_models import RMEMNISTModel as RMModel
 from arch.ensemble_models import EnsEMNISTModel as EnsModel
 from arch.standard_models import EMNISTModel as StandardModel 
 
-def train_emnist(models):
+def train_emnist(models, save_dir):
     """
     Train specified models on the EMNIST dataset
 
     Parameters:
-    - models (dict): A dictionary of models to train (choose from 'rmaggnet', 'ensemble', 'ccat' and 'surrogate') as keys with the file names as values
+    - models (list of string): A list of models to train (choose from 'rmaggnet', 'ensemble', 'ccat' and 'surrogate')
+    - save_dir (string): The directory to save the models to
     """
     #### Set up the logger
     logname = datetime.datetime.now().strftime("%d-%m-%Y-%H%M")
@@ -52,8 +53,7 @@ def train_emnist(models):
     if 'rmaggnet' in models:
         rm_aggnet = RMAggNet([x for x in range(47)], RMModel, m=5, r=1, learning_rate=1e-4)
         model_loss_hist = rm_aggnet.train_model(train_dataset, validation_dataset, batch_size=batch_size, epochs=epochs, learning_rate=1e-4, class_threshold=0.5, verbose=False, logger=prog_logger)
-        # rm_aggnet.save_aggnet("trained_models/rmaggnet_emnist")
-        rm_aggnet.save_aggnet("trained_models/{}".format(models['rmaggnet']))
+        rm_aggnet.save_aggnet("{}/rmaggnet_emnist".format(save_dir))
         prog_logger.info("===RMAggNet===")
         rm_aggnet.aggnet_eval(rm_aggnet, test_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=7, logger=prog_logger)
 
@@ -64,8 +64,7 @@ def train_emnist(models):
     if 'ensemble' in models:
         ensemble_model = ensemble.Ensemble(EnsModel, 32)
         ensemble_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-4, verbose=False, logger=prog_logger)
-        # ensemble_model.save_ensemble("trained_models/ens_emnist")
-        ensemble_model.save_ensemble("trained_models/{}".format(models['ensemble']))
+        ensemble_model.save_ensemble("{}/ens_emnist".format(save_dir))
 
         prog_logger.info("===Ensemble===")
         ensemble.ensemble_eval(ensemble_model, test_loader, thresholds=[x/10 for x in range(11)])
@@ -89,8 +88,7 @@ def train_emnist(models):
             optimizer=optimizer, 
             epsilon=0.3, 
             cuda=True, 
-            # save_path='trained_models/ccat_emnist.pth.tar'
-            save_path='trained_models/{}.pth.tar'.format(models['ccat'])
+            save_path="{}/ccat_emnist.pth.tar".format(save_dir)
         )
 
         print("=== CCAT ===")
@@ -103,13 +101,7 @@ def train_emnist(models):
         standard_model = StandardModel()
         standard_model.train_on_data(train_loader, val_loader, epochs=epochs, lr=1e-4, verbose=False, logger=prog_logger)
         standard_model.evaluate(test_loader, logger=prog_logger)
-        # torch.save(standard_model.state_dict(), 'trained_models/standard_emnist.pth.tar')
-        torch.save(standard_model.state_dict(), 'trained_models/{}.pth.tar'.format(models['surrogate']))
+        torch.save(standard_model.state_dict(), "{}/standard_emnist.pth.tar".format(save_dir))
 
 if __name__ == "__main__":
-    train_emnist({
-        "rmaggnet": "rmaggnet_emnist",
-        "ensemble": "ens_emnist",
-        "ccat": "ccat_emnist",
-        "surrogate": "standard_emnist"
-    })
+    train_emnist(["rmaggnet", "ensemble", "ccat", "surrogate"], save_dir="trained_models")

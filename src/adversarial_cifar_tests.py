@@ -36,12 +36,13 @@ def save_image_sample(sample_images, path):
     plt.close()
 
 
-def attack_cifar(models, attacks, type):
+def attack_cifar(models, load_dir, attacks, type):
     """
     Evaluates the effect of adversarial attacks on the CIFAR-10 dataset
 
     Parameters:
-    - models (dict): A dictionary of models to train (choose from 'rmaggnet', 'ensemble' and 'ccat') as keys with the file names as values
+    - models (list of string): A list of models to train (choose from 'rmaggnet', 'ensemble', 'ccat' and 'surrogate')
+    - load_dir (string): The directory to load the models from
     - attacks (list of string): A list of attacks to use (choose from 'pgdl2', 'pgdlinf', 'cwl2' and 'boundary')
     - type (list of string): A list of attack types (choose from 'openbox', 'closedbox')
     """
@@ -71,7 +72,7 @@ def attack_cifar(models, attacks, type):
     # Make sure learning rates etc. match how the model was trained!
     ################################# RMAggNet
     if 'rmaggnet' in models:
-        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, load_path="trained_models/{}".format(models['rmaggnet']))
+        rm_aggnet = RMAggNet([x for x in range(10)], RMModel, m=4, r=1, load_path="{}/rmaggnet_cifar".format(load_dir))
 
         ################################# RMAggDiff
         # A differentiable approximation to RMAggNet
@@ -79,7 +80,7 @@ def attack_cifar(models, attacks, type):
 
     ################################# Ensemble
     if 'ensemble' in models:
-        ensemble_model = ensemble.Ensemble(EnsModel, 16, load_path="trained_models/{}".format(models['ensemble']))
+        ensemble_model = ensemble.Ensemble(EnsModel, 16, load_path="{}/ens_cifar".format(load_dir))
 
 
     ################################# CCAT
@@ -87,10 +88,7 @@ def attack_cifar(models, attacks, type):
         # Setup a model, the optimizer, learning rate scheduler.
         ccat_base_model = EnsModel()
         ccat = CCAT(ccat_base_model)
-        ccat.ccat_model.load_state_dict(torch.load("trained_models/{}.pth.tar".format(models['ccat'])))
-
-
-    
+        ccat.ccat_model.load_state_dict(torch.load("{}/ccat_cifar.pth.tar".format(load_dir)))
 
 
     #################################################### Evaluation!
@@ -147,7 +145,7 @@ def attack_cifar(models, attacks, type):
     # Load surrogate model for closed-box adversarial attack via transferability
     logger.info("=== Surrogate model ===")
     base_model = StandardModel()
-    base_model.load_state_dict(torch.load("trained_models/standard_cifar.pth.tar"))
+    base_model.load_state_dict(torch.load("{}/standard_cifar.pth.tar".format(load_dir)))
     base_model.to('cuda')
     base_model.evaluate(test_loader, logger=logger)
 
@@ -292,11 +290,12 @@ def attack_cifar(models, attacks, type):
 
 if __name__ == "__main__":
     attack_cifar(
-        models={
-            "rmaggnet": "rmaggnet_cifar",
-            "ensemble": "ens_cifar",
-            "ccat": "ccat_cifar"
-        },
+        models=[
+            "rmaggnet",
+            "ensemble",
+            "ccat"
+        ],
+        load_dir="trained_models",
         attacks=["pgdl2", "pgdlinf"],
         type=["closedbox", "openbox"]
     )
