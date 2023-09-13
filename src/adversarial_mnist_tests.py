@@ -79,7 +79,7 @@ def attack_mnist(models, load_dir, attacks, attack_type, cuda):
 
         ################################# RMAggDiff
         # A differentiable approximation to RMAggNet
-        hybrid = RMAggDiff(rm_aggnet)
+        hybrid = RMAggDiff(rm_aggnet, cuda=cuda)
 
 
     ################################# Ensemble
@@ -301,7 +301,7 @@ def attack_mnist(models, load_dir, attacks, attack_type, cuda):
                 hybrid.to_device(device=device)
                 print("DR DEVICE:", next(hybrid.diff_replacement.parameters()).device)
 
-                adv_hybrid_model = fb.PyTorchModel(hybrid, bounds=(0,1))
+                adv_hybrid_model = fb.PyTorchModel(hybrid, bounds=(0,1), device=device)
                 raw_adv, clipped_adv_eps, is_adv = attack(adv_hybrid_model, test_images, test_labels, epsilons=epsilons)
                 print("ADV DR DEVICE:", next(adv_hybrid_model.diff_replacement.parameters()).device)
 

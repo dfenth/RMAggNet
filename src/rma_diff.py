@@ -141,7 +141,7 @@ def synthetic_dataset_gen(class_codewords, dataset_size):
 
 class RMAggDiff(torch.nn.Module):
     """The differentiable RMAggNet classifier"""
-    def __init__(self, rm_aggnet_model):
+    def __init__(self, rm_aggnet_model, cuda):
         super(RMAggDiff, self).__init__()
         self.rm_aggnet = rm_aggnet_model
         self.diff_replacement = Classifier(codeword_length=len(self.rm_aggnet.bitstring_classes[0]), num_classes=len(self.rm_aggnet.class_set))
@@ -154,7 +154,7 @@ class RMAggDiff(torch.nn.Module):
         train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
         val_loader = torch.utils.data.DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 
-        self.diff_replacement.train_data(train_loader, epochs=10, val_data=val_loader)
+        self.diff_replacement.train_data(train_loader, epochs=10, val_data=val_loader, cuda=cuda)
 
     def to_device(self, device):
         """
@@ -163,7 +163,7 @@ class RMAggDiff(torch.nn.Module):
         Parameters:
         - device (str): The device to move to
         """
-        self.rm_aggnet.to(device)
+        self.rm_aggnet.to_device(device)
         self.diff_replacement.to(device)
         self.to(device)
 

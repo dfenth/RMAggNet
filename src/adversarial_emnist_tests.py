@@ -79,7 +79,7 @@ def attack_emnist(models, load_dir, attacks, attack_type, cuda):
 
         ################################# RMAggDiff
         # A differentiable approximation to RMAggNet
-        hybrid = RMAggDiff(rm_aggnet)
+        hybrid = RMAggDiff(rm_aggnet, cuda=cuda)
 
 
     ################################# Ensemble
