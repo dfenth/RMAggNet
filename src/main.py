@@ -4,6 +4,8 @@ import logging
 import mnist_train, emnist_train, cifar_train
 import adversarial_mnist_tests, adversarial_emnist_tests, adversarial_cifar_tests
 
+import torch
+
 logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description="Allows modular execution of the Reed-Muller Aggregation Network code")
@@ -62,6 +64,7 @@ parser.add_argument(
     help='The directory to save the models to if `--mode train`, or load the models from if `--mode attack`',
     required=True
 )
+
 
 args = parser.parse_args()
 

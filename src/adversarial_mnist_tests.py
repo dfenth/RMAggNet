@@ -276,6 +276,7 @@ def attack_mnist(models, load_dir, attacks, attack_type):
 
             if 'ensemble' in models:
                 logger.info("== Ensemble ==\nCorrect | Rejected | Incorrect")
+                ensemble_model.to("cuda")
                 adv_ensemble_model = fb.PyTorchModel(ensemble_model, bounds=(0,1))
                 raw_adv, clipped_adv_eps, is_adv = attack(adv_ensemble_model, test_images, test_labels, epsilons=epsilons)
                 
@@ -289,7 +290,9 @@ def attack_mnist(models, load_dir, attacks, attack_type):
                     logger.info("- eps: {} -".format(eps))
                     ensemble.ensemble_eval(ensemble_model, adv_loader, thresholds=thresholds, logger=logger)
                     del adv_loader
-            
+                
+                ensemble_model.to('cpu')
+
             if 'rmaggnet' in models:
                 adv_hybrid_model = fb.PyTorchModel(hybrid, bounds=(0,1))
                 raw_adv, clipped_adv_eps, is_adv = attack(adv_hybrid_model, test_images, test_labels, epsilons=epsilons)

@@ -178,7 +178,7 @@ def attack_emnist(models, load_dir, attacks, attack_type):
             exit()
         
         epsilons = adversarial_attacks[attack_name]
-        logger.info(attack_name)
+        logger.info("***** {} Attack *****".format(attack_name))
         
         if 'closedbox' in attack_type:
             #### Transfer attacks
