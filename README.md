@@ -41,7 +41,7 @@ The options are:
 - `--boxtype` - Specify the box type (select multiple from `openbox`, `closedbox` or `both`)
 - `--attacks` - List all attacks to be used if `--mode attack` (select multiple from `pgdl2`, `pgdlinf`, `cwl2`, `boundary` or `all`)
 - `--dir` - The directory to save the models to if `--mode train`, or load the models from if `--mode attack`
-- `--cuda` - Whether CUDA should be used for training/testing (`True` or `False`)
+- `--cuda`/`--no-cuda` - Whether CUDA should be used for training/testing
 
 ## Paper run
 The code was run on an NVIDIA A100 80GB GPU. 

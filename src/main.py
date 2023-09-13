@@ -97,13 +97,13 @@ if args.mode == "train":
 
     for d in datasets:
         if d == 'mnist':
-            print("Training MNIST: {}, {}".format(models))
+            print("Training MNIST: {}, {}, CUDA: {}".format(models, args.dir, cuda))
             mnist_train.train_mnist(models, args.dir, cuda)
         elif d == 'emnist':
-            print("Training EMNIST: {}, {}".format(models, args.dir, cuda))
+            print("Training EMNIST: {}, {}, CUDA: {}".format(models, args.dir, cuda))
             emnist_train.train_emnist(models, args.dir)
         elif d == 'cifar':
-            print("Training CIFAR: {}, {}".format(models, args.dir, cuda))
+            print("Training CIFAR-10: {}, {}, CUDA: {}".format(models, args.dir, cuda))
             cifar_train.train_cifar(models, args.dir)
 
 elif args.mode == "attack":
