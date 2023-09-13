@@ -30,9 +30,9 @@ We can also make this more modular, specifying datasets, models and attacks (if 
 
 For instance, an example invocation:
 ```
-python3 main.py --mode attack --dataset emnist --models ensemble --dir trained_models --boxtype openbox --attacks pgdlinf pgdl2
+python3 main.py --mode attack --dataset emnist --models ensemble --dir trained_models --boxtype openbox --attacks pgdlinf pgdl2 --cuda
 ```
-Which performs open-box PGD Linf and L2 attacks on the Ensemble model trained on EMNIST.
+Which performs open-box PGD Linf and L2 attacks on the Ensemble model trained on EMNIST using CUDA.
 
 The options are:
 - `--mode` - Defines the execution mode (`train` or `attack`) which trains the specified models or performs an adversarial attack
@@ -42,6 +42,18 @@ The options are:
 - `--attacks` - List all attacks to be used if `--mode attack` (select multiple from `pgdl2`, `pgdlinf`, `cwl2`, `boundary` or `all`)
 - `--dir` - The directory to save the models to if `--mode train`, or load the models from if `--mode attack`
 - `--cuda`/`--no-cuda` - Whether CUDA should be used for training/testing
+
+## Running in docker
+The repo includes a `dockerfile` which can be used to re-create the execution environment in docker. This can be built and run with the commads:
+```
+sudo docker build -f dockerfile -t rmaggnet .
+sudo docker run --rm --gpus all rmaggnet
+```
+Alternatively, it can be run in an interactive mode using
+```
+sudo docker run --rm --gpus all -it rmaggnet sh
+```
+To use NVIDIA GPUs within the container for training/evaluation please see the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html) webpage.
 
 ## Paper run
 The code was run on an NVIDIA A100 80GB GPU. 
