@@ -4,6 +4,7 @@ import time
 import datetime
 import logging
 
+from rm_aggnet import aggnet_eval
 from rm_aggnet import ReedMullerAggregationNetwork as RMAggNet 
 import ensemble
 from ccat_model import CCAT
@@ -58,7 +59,7 @@ def train_cifar(models, save_dir, cuda):
         rm_aggnet.save_aggnet("{}/rmaggnet_cifar".format(save_dir))
         
         prog_logger.info("===RMAggNet===")
-        rm_aggnet.aggnet_eval(rm_aggnet, test_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=prog_logger)
+        aggnet_eval(rm_aggnet, test_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=prog_logger)
         prog_logger.info("RMAggNet training took: {:.2f}s".format(time.time()-rm_start_time))
 
         del rm_aggnet

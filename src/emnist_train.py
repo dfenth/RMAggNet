@@ -3,6 +3,7 @@ import torchvision
 import datetime
 import logging
 
+from rm_aggnet import aggnet_eval
 from rm_aggnet import ReedMullerAggregationNetwork as RMAggNet 
 import ensemble
 from ccat_model import CCAT
@@ -56,7 +57,7 @@ def train_emnist(models, save_dir, cuda):
         model_loss_hist = rm_aggnet.train_model(train_dataset, validation_dataset, batch_size=batch_size, epochs=epochs, learning_rate=1e-4, class_threshold=0.5, verbose=False, logger=prog_logger)
         rm_aggnet.save_aggnet("{}/rmaggnet_emnist".format(save_dir))
         prog_logger.info("===RMAggNet===")
-        rm_aggnet.aggnet_eval(rm_aggnet, test_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=7, logger=prog_logger)
+        aggnet_eval(rm_aggnet, test_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=7, logger=prog_logger)
 
         del rm_aggnet
 
