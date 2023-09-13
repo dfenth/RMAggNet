@@ -1,7 +1,10 @@
 import argparse
+import logging
 
 import mnist_train, emnist_train, cifar_train
 import adversarial_mnist_tests, adversarial_emnist_tests, adversarial_cifar_tests
+
+logger = logging.getLogger(__name__)
 
 parser = argparse.ArgumentParser(description="Allows modular execution of the Reed-Muller Aggregation Network code")
 
