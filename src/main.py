@@ -108,13 +108,13 @@ elif args.mode == "attack":
     for d in datasets:
         if d == 'mnist':
             print("Attacking MNIST: {}, {}, {}, {}".format(models, args.dir, attacks, boxtype))
-            adversarial_mnist_tests.attack_mnist(models, args.dir, attacks, type)
+            adversarial_mnist_tests.attack_mnist(models, args.dir, attacks, boxtype)
         elif d == 'emnist':
             print("Attacking EMNIST: {}, {}, {}, {}".format(models, args.dir, attacks, boxtype))
-            adversarial_emnist_tests.attack_emnist(models, args.dir, attacks, type)
+            adversarial_emnist_tests.attack_emnist(models, args.dir, attacks, boxtype)
         elif d == 'cifar':
             print("Attacking CIFAR: {}, {}, {}, {}".format(models, args.dir, attacks, boxtype))
-            adversarial_cifar_tests.attack_cifar(models, args.dir, attacks, type)
+            adversarial_cifar_tests.attack_cifar(models, args.dir, attacks, boxtype)
 
 else:
     print("Failed to execute due to bad --mode")
