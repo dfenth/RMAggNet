@@ -4,10 +4,12 @@ This repository contains the code from the paper *"Using Reed-Muller Codes for C
 
 A dockerfile is provided which can be used with NVIDIA GPUs. Please follow the instructions on the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html) for details on how to set up docker with GPU support.
 
-Remember to use `git submodule update --init --recursive` to install the CCAT code. Alternatively the repo and all submodules can be installed with 
+Remember to use `git submodule update --init --recursive` to install the [CCAT](github.com/davidstutz/confidence-calibrated-adversarial-training) code. Alternatively the repo and all submodules can be installed with 
 ```
 git clone --recurse-submodules https://github.com/dfenth/RMAggNet.git
 ```
+
+
 
 **Apologies for the mess! This will be cleaned up by Friday!**
 
@@ -57,3 +59,4 @@ To use NVIDIA GPUs within the container for training/evaluation please see the [
 
 ## Paper run environment
 The code was run on an NVIDIA A100 80GB GPU. An 80 GB GPU seems necessary for the larger EMNIST and CIFAR-10 models because we do load a lot of models into GPU memory at once (and load a lot of the dataset as well). As a result around 16GB of RAM is also advised. I guarantee that this can be improved with some more careful memory management, but as often happens in research, we weren't able to get to this optimisation.
+

@@ -484,11 +484,11 @@ def aggnet_eval(rm_aggnet, dataset, max_correction, batch_size=64, thresholds=[0
     for t in thresholds:
         res = rm_aggnet.evaluate(dataset, batch_size=batch_size, class_threshold=t)
         if ood:
-            logger.info("{:.1f} | {:.2f} | {:.2f}".format(
+            logger.info("| {:.1f} | {:.2f} | {:.2f} |".format(
                 t, res['rejected']*100, (res['incorrect']+res['correct'])*100 
             ))
         else:
-            logger.info("{:.1f} | {:.2f} | {:.2f} | {:.2f}".format(
+            logger.info("| {:.1f} | {:.2f} | {:.2f} | {:.2f} |".format(
                 t, res['correct']*100, res['rejected']*100, res['incorrect']*100 
             ))
 
@@ -497,10 +497,10 @@ def aggnet_eval(rm_aggnet, dataset, max_correction, batch_size=64, thresholds=[0
         for t in thresholds:
             res = rm_aggnet.evaluate(dataset, batch_size=batch_size, class_threshold=t, error_correction=True, num_bits=num_corrections)
             if ood:
-                logger.info("{:.1f} | {:.2f} | {:.2f}".format(
+                logger.info("| {:.1f} | {:.2f} | {:.2f} |".format(
                     t, res['rejected']*100, (res['incorrect']+res['correct'])*100
                 ))
             else:
-                logger.info("{:.1f} | {:.2f} | {:.2f} | {:.2f}".format(
+                logger.info("| {:.1f} | {:.2f} | {:.2f} | {:.2f} |".format(
                     t, res['correct']*100, res['rejected']*100, res['incorrect']*100 
                 ))

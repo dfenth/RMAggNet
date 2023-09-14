@@ -333,10 +333,20 @@ def ensemble_eval(ensemble, dataset, thresholds, logger=None, ood=False, cuda=Tr
     for t in thresholds:
         res = ensemble.evaluate_with_reject(dataset, t, cuda=cuda)
         if ood:
-            logger.info("{:.1f} | {:.2f} | {:.2f}".format(
-                t, res['rejected']*100, (res['incorrect']+res['correct'])*100 
-            ))
+            if logger:
+                logger.info("| {:.1f} | {:.2f} | {:.2f} |".format(
+                    t, res['rejected']*100, (res['incorrect']+res['correct'])*100 
+                ))
+            else:
+                print("| {:.1f} | {:.2f} | {:.2f} |".format(
+                    t, res['rejected']*100, (res['incorrect']+res['correct'])*100 
+                ))
         else:
-            logger.info("{:.1f} | {:.2f} | {:.2f} | {:.2f}".format(
-                t, res['correct']*100, res['rejected']*100, res['incorrect']*100 
-            ))
+            if logger:
+                logger.info("| {:.1f} | {:.2f} | {:.2f} | {:.2f} |".format(
+                    t, res['correct']*100, res['rejected']*100, res['incorrect']*100 
+                ))
+            else:
+                print("| {:.1f} | {:.2f} | {:.2f} | {:.2f} |".format(
+                    t, res['correct']*100, res['rejected']*100, res['incorrect']*100 
+                ))

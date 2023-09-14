@@ -123,13 +123,13 @@ class CCAT:
             incorrect = results.shape[0]-rejected
             if logger:
                 if not ood:
-                    logger.info("{:.1f} | {:.2f} | {:.2f} | {:.2f}".format(t, (correct/results.shape[0])*100, (rejected/results.shape[0])*100, (1-((correct+rejected)/results.shape[0]))*100))
+                    logger.info("| {:.1f} | {:.2f} | {:.2f} | {:.2f} |".format(t, (correct/results.shape[0])*100, (rejected/results.shape[0])*100, (1-((correct+rejected)/results.shape[0]))*100))
                 else:
-                    logger.info("{:.1f} | {:.2f} | {:.2f}".format(t, (rejected/results.shape[0])*100, incorrect/results.shape[0]*100))
+                    logger.info("| {:.1f} | {:.2f} | {:.2f} |".format(t, (rejected/results.shape[0])*100, incorrect/results.shape[0]*100))
             else:
                 if not ood:
-                    print("{:.1f} | {:.2f} | {:.2f} | {:.2f}".format(t, correct/results.shape[0], rejected/results.shape[0], 1-((correct+rejected)/results.shape[0])))
+                    print("| {:.1f} | {:.2f} | {:.2f} | {:.2f} |".format(t, correct/results.shape[0], rejected/results.shape[0], 1-((correct+rejected)/results.shape[0])))
                 else:
-                    print("{:.1f} | {:.2f} | {:.2f} ".format(t, rejected/results.shape[0], incorrect/results.shape[0]))
+                    print("| {:.1f} | {:.2f} | {:.2f} |".format(t, rejected/results.shape[0], incorrect/results.shape[0]))
 
         self.ccat_model.to('cpu')

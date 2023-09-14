@@ -101,15 +101,15 @@ def attack_mnist(models, load_dir, attacks, attack_type, cuda):
     logger.info("=== Clean data ===")
 
     if 'ccat' in models:
-        logger.info("= CCAT =\nCorrect | Rejected | Incorrect")
+        logger.info("= CCAT =\n| Tau | Correct | Rejected | Incorrect")
         ccat.evaluate(test_loader, confidence_thresholds=thresholds, cuda=cuda, logger=logger)
 
     if 'ensemble' in models:
-        logger.info("= Ensemble =\nCorrect | Rejected | Incorrect")
+        logger.info("= Ensemble =\n| Sigma | Correct | Rejected | Incorrect")
         ensemble.ensemble_eval(ensemble_model, test_loader, thresholds=thresholds, logger=logger, cuda=cuda)
 
     if 'rmaggnet' in models:
-        logger.info("= RMAggNet =\nCorrect | Rejected | Incorrect")
+        logger.info("= RMAggNet =\n| EC | Correct | Rejected | Incorrect")
         aggnet_eval(rm_aggnet, test_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=logger)
 
         logger.info("= RMAggDiff =")
@@ -123,15 +123,15 @@ def attack_mnist(models, load_dir, attacks, attack_type, cuda):
     random_dataset = torch.utils.data.DataLoader(list(zip(noise_images, noise_labels)), batch_size=batch_size, shuffle=False)
 
     if 'ccat' in models:
-        logger.info("= CCAT =\nRejected | Incorrect")
+        logger.info("= CCAT =\n| Tau | Rejected | Incorrect")
         ccat.evaluate(random_dataset, confidence_thresholds=thresholds, cuda=cuda, logger=logger, ood=True)
 
     if 'ensemble' in models:
-        logger.info("= Ensemble =\nRejected | Incorrect")
+        logger.info("= Ensemble =\n| Sigma | Rejected | Incorrect")
         ensemble.ensemble_eval(ensemble_model, random_dataset, thresholds=thresholds, logger=logger, ood=True, cuda=cuda)
 
     if 'rmaggnet' in models:
-        logger.info("= RMAggNet =\nRejected | Incorrect")
+        logger.info("= RMAggNet =\n| EC | Rejected | Incorrect")
         aggnet_eval(rm_aggnet, list(zip(noise_images, noise_labels)), batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=logger, ood=True)
 
         logger.info("= RMAggDiff =")
@@ -146,15 +146,15 @@ def attack_mnist(models, load_dir, attacks, attack_type, cuda):
     fmnist_loader = torch.utils.data.DataLoader(fmnist_dataset, batch_size=batch_size, shuffle=True)
 
     if 'ccat' in models:
-        logger.info("= CCAT =\nRejected | Incorrect")
+        logger.info("= CCAT =\n| Tau | Rejected | Incorrect")
         ccat.evaluate(fmnist_loader, confidence_thresholds=thresholds, cuda=cuda, logger=logger, ood=True)
     
     if 'ensemble' in models:
-        logger.info("= Ensemble =\nRejected | Incorrect")
+        logger.info("= Ensemble =\n| Sigma | Rejected | Incorrect")
         ensemble.ensemble_eval(ensemble_model, fmnist_loader, thresholds=thresholds, logger=logger, ood=True, cuda=cuda)
 
     if 'rmaggnet' in models:
-        logger.info("= RMAggNet =\nRejected | Incorrect")
+        logger.info("= RMAggNet =\n| EC | Rejected | Incorrect")
         aggnet_eval(rm_aggnet, fmnist_dataset, batch_size=batch_size, thresholds=[0.5], max_correction=3, logger=logger, ood=True)
 
         logger.info("= RMAggDiff =")
@@ -225,21 +225,21 @@ def attack_mnist(models, load_dir, attacks, attack_type, cuda):
                 base_model.evaluate(adv_loader, logger=logger)
             
             if 'ccat' in models:
-                logger.info("== CCAT ==\nCorrect | Rejected | Incorrect")
+                logger.info("== CCAT ==\n| Tau | Correct | Rejected | Incorrect")
                 for eps, adv_data in zip(epsilons, clipped_adv_eps):
                     adv_loader = torch.utils.data.DataLoader(list(zip(adv_data, test_labels)), batch_size=batch_size, shuffle=False)
                     logger.info("- eps: {} -".format(eps))
                     ccat.evaluate(adv_loader, confidence_thresholds=thresholds, cuda=cuda, logger=logger)
 
             if 'ensemble' in models:
-                logger.info("== Ensemble ==\nCorrect | Rejected | Incorrect")
+                logger.info("== Ensemble ==\n| Sigma | Correct | Rejected | Incorrect")
                 for eps, adv_data in zip(epsilons, clipped_adv_eps):
                     adv_loader = torch.utils.data.DataLoader(list(zip(adv_data, test_labels)), batch_size=batch_size, shuffle=False)
                     logger.info("- eps: {} -".format(eps))
                     ensemble.ensemble_eval(ensemble_model, adv_loader, thresholds=thresholds, logger=logger, cuda=cuda)
 
             if 'rmaggnet' in models:
-                logger.info("== RMAggNet ==\nCorrect | Rejected | Incorrect")
+                logger.info("== RMAggNet ==\n| EC | Correct | Rejected | Incorrect")
                 for eps, adv_data in zip(epsilons, clipped_adv_eps):
                     adv_dataset = list(zip(adv_data, test_labels))
                     logger.info("- eps: {} -".format(eps))
@@ -250,7 +250,7 @@ def attack_mnist(models, load_dir, attacks, attack_type, cuda):
             logger.info("=== Open-box attacks ===")
             
             if 'ccat' in models:
-                logger.info("== CCAT ==\nCorrect | Rejected | Incorrect")
+                logger.info("== CCAT ==\n| Tau | Correct | Rejected | Incorrect")
                 adv_ccat_model = fb.PyTorchModel(ccat.ccat_model, bounds=(0,1))
                 if "Boundary" in attack_name:
                     # Run the boundary attacks for individual eps values so we can handle failures
@@ -278,7 +278,7 @@ def attack_mnist(models, load_dir, attacks, attack_type, cuda):
                     del adv_loader
 
             if 'ensemble' in models:
-                logger.info("== Ensemble ==\nCorrect | Rejected | Incorrect")
+                logger.info("== Ensemble ==\n| Sigma | Correct | Rejected | Incorrect")
                 ensemble_model.to_device(device)
 
                 adv_ensemble_model = fb.PyTorchModel(ensemble_model, bounds=(0,1))
@@ -309,11 +309,11 @@ def attack_mnist(models, load_dir, attacks, attack_type, cuda):
                 
                 for eps, adv_data in zip(epsilons, clipped_adv_eps):
                     adv_loader = torch.utils.data.DataLoader(list(zip(adv_data, test_labels)), batch_size=batch_size, shuffle=False)
-                    logger.info("== RMAggDiff ==\nCorrect | Rejected | Incorrect")
+                    logger.info("== RMAggDiff ==\n| EC | Correct | Rejected | Incorrect")
                     logger.info("-- eps: {} --".format(eps))
                     logger.info(hybrid.evaluate(adv_loader))
                     
-                    logger.info("== RMAggNet ==\nCorrect | Rejected | Incorrect")
+                    logger.info("== RMAggNet ==\n| EC | Correct | Rejected | Incorrect |")
                     logger.info("-- eps: {} --".format(eps))
                     tmp_test_labels = torch.tensor([l for _,l in test_dataset[:adv_sample_size]])
                     adv_dataset = list(zip(adv_data, tmp_test_labels))
