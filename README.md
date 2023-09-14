@@ -9,11 +9,6 @@ Remember to use `git submodule update --init --recursive` to install the [CCAT](
 git clone --recurse-submodules https://github.com/dfenth/RMAggNet.git
 ```
 
-
-
-**Apologies for the mess! This will be cleaned up by Friday!**
-
-
 ## Running code
 The `main.py` file allows the code to be run in a modular fashion. There are two modes of operation, **training** which can be invoked with `--mode train` or **attacking** invoked with `--mode attack`. The only other required flag is `--dir` which specifies the directory to save any models to (in the case of `--mode train`) or load models from (in the case of `--mode attack`).
 
