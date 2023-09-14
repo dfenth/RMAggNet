@@ -46,12 +46,15 @@ The options are:
 - `--cuda`/`--no-cuda` - Whether CUDA should be used for training/testing
 
 ## Running in docker
-The repo includes a `dockerfile` which can be used to re-create the execution environment in docker. This can be built and run with the commads:
+The repo includes a `dockerfile` which can be used to re-create the execution environment in docker. This can be built:
 ```
 sudo docker build -f dockerfile -t rmaggnet .
-sudo docker run --rm --gpus all rmaggnet
 ```
-Alternatively, it can be run in an interactive mode using
+And run using all of the command line options described above:
+```
+docker run --rm --gpus all rmaggnet --mode train --dataset mnist --models rmaggnet --dir newdir
+```
+Alternatively, it can be run in an interactive mode using:
 ```
 sudo docker run --rm --gpus all -it rmaggnet sh
 ```
