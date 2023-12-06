@@ -55,6 +55,8 @@ sudo docker run --rm --gpus all -it rmaggnet sh
 ```
 To use NVIDIA GPUs within the container for training/evaluation please see the [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html) webpage.
 
-## Paper run environment
+## Run environment
 The code was run on an NVIDIA A100 80GB GPU. An 80 GB GPU seems necessary for the larger EMNIST and CIFAR-10 models because we do load a lot of models into GPU memory at once (and load a lot of the dataset as well). As a result around 32GB of RAM is also advised. I guarantee that this can be improved with some more careful memory management, but as often happens in research, we weren't able to get to this optimisation.
 
+## Pre-trained models
+Pre-trained models are not included in the repo due to github upload limits. However, they are available on request!
