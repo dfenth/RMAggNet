@@ -267,6 +267,10 @@ class ReedMullerAggregationNetwork(torch.nn.Module):
         # Get the raw results from the models predicting set membership of the inputs
         membership_vector = self.forward(x).cpu().detach().numpy()
         
+        # Handle bug which occurs when x is a single element
+        if x.shape[0] == 1:
+            membership_vector = np.expand_dims(membership_vector, axis=0)
+
         # Threshold all of the values
         threshold = np.vectorize(lambda z: 1 if z > class_threshold else 0)
         membership_vector = threshold(membership_vector)
